@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: acts-church-cms
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: APP_NAME
+        value: "ACTS Church CMS"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        fromRenderService:
+          type: web
+          name: acts-church-cms
+          property: host
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: acts-cms-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: acts-cms-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: acts-cms-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: acts-cms-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: acts-cms-db
+          property: password
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_DRIVER
+        value: file
+
+databases:
+  - name: acts-cms-db
+    engine: mysql
+    plan: starter
