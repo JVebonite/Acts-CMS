@@ -1,7 +1,7 @@
 FROM php:8.1-fpm-alpine AS base
 
 # Install system dependencies
-RUN RUN apk add --no-cache \
+RUN apk add --no-cache \
     nginx \
     supervisor \
     nodejs \
