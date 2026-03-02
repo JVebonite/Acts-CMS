@@ -3,6 +3,11 @@ set -e
 
 cd /var/www/html
 
+# Create .env file if it doesn't exist
+if [ ! -f .env ]; then
+    cp .env.example .env
+fi
+
 # Generate app key if not set
 if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
@@ -17,6 +22,11 @@ mkdir -p bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Substitute PORT variable in nginx config
+export PORT="${PORT:-8080}"
+envsubst '${PORT}' < /etc/nginx/http.d/default.conf > /etc/nginx/http.d/default.conf.tmp
+mv /etc/nginx/http.d/default.conf.tmp /etc/nginx/http.d/default.conf
+
 # Cache config and routes for production
 php artisan config:cache
 php artisan route:cache
@@ -25,6 +35,6 @@ php artisan view:cache
 # Run migrations automatically
 php artisan migrate --force
 
-echo "==> Application ready on port 8080"
+echo "==> Application ready on port $PORT"
 
 exec "$@"
