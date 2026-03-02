@@ -131,7 +131,7 @@ echo "==> Application ready on port $PORT"
 exec "$@"
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8080
+EXPOSE ${PORT};
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
