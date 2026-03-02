@@ -7,7 +7,6 @@ RUN apk add --no-cache \
     nodejs \
     npm \
     curl \
-    gettext \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
@@ -47,91 +46,15 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
 # Copy config files
-COPY server {
-    listen ${PORT};
-    server_name _;
-    root /var/www/html/public;
-    index index.php index.html;
-
-    client_max_body_size 20M;
-
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-
-    charset utf-8;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
-    location ~ \.php$ {
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_hide_header X-Powered-By;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-}
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Copy and set entrypoint
-COPY #!/bin/sh
-set -e
-
-cd /var/www/html
-
-# Create .env file if it doesn't exist
-if [ ! -f .env ]; then
-    cp .env.example .env
-fi
-
-# Generate app key if not set
-if [ -z "$APP_KEY" ]; then
-    php artisan key:generate --force
-fi
-
-# Create storage directories if missing
-mkdir -p storage/framework/{sessions,views,cache}
-mkdir -p storage/logs
-mkdir -p bootstrap/cache
-
-# Set permissions
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-
-# Substitute PORT variable in nginx config
-export PORT="${PORT:-8080}"
-envsubst '${PORT}' < /etc/nginx/http.d/default.conf > /etc/nginx/http.d/default.conf.tmp
-mv /etc/nginx/http.d/default.conf.tmp /etc/nginx/http.d/default.conf
-
-# Cache config and routes for production
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# Run migrations automatically
-php artisan migrate --force
-
-echo "==> Application ready on port $PORT"
-
-exec "$@"
+COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE ${PORT};
+EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
