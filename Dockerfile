@@ -1,12 +1,13 @@
 FROM php:8.1-fpm-alpine AS base
 
 # Install system dependencies
-RUN apk add --no-cache \
+RUN RUN apk add --no-cache \
     nginx \
     supervisor \
     nodejs \
     npm \
     curl \
+    gettext \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
