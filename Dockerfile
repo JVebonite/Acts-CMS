@@ -84,7 +84,7 @@ COPY server {
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
-} /etc/nginx/http.d/default.conf
+}
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 
