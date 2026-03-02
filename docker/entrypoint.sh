@@ -35,6 +35,8 @@ php artisan view:cache
 # Run migrations automatically
 php artisan migrate --force
 
+# Seed the database
+php artisan db:seed --force
 echo "==> Application ready on port $PORT"
 
 exec "$@"
