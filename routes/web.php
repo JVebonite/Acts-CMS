@@ -11,7 +11,16 @@ use App\Http\Controllers\SmsController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\ClusterController;
+use App\\Http\\Controllers\\ClusterController;
+
+/*
+|--------------------------------------------------------------------------
+| Health Check Route
+|--------------------------------------------------------------------------
+*/
+Route::get('/health', function () {
+    return response('OK', 200);
+});
 
 /*
 |--------------------------------------------------------------------------
